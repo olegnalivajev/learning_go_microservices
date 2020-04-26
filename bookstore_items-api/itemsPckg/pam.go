@@ -1,4 +1,4 @@
-package itemsPckg
+package items
 
 import "fmt"
 
