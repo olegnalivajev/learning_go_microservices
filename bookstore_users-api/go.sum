@@ -28,6 +28,7 @@ github.com/modern-go/reflect2 v0.0.0-20180701023420-4b7aa43c6742 h1:Esafd1046DLD
 github.com/modern-go/reflect2 v0.0.0-20180701023420-4b7aa43c6742/go.mod h1:bx2lNnkwVCuqBIxFjflWJWanXIb3RllmbCylyMrvgv0=
 github.com/olegnalivajev/learning_go_microservices v0.0.0-20200426141031-ae65de2aa00a h1:ahTaZn2qHYYIH86lDUuWoG1KmjcRhH5GaQrjCc/txdg=
 github.com/olegnalivajev/learning_go_microservices v0.0.0-20200426143341-b620976db5e8 h1:fDF8avactxewzVmj74c5SehP3ANyHxm4wHPMAI8m5LQ=
+github.com/olegnalivajev/learning_go_microservices v0.0.0-20200426150031-34f0f66f5e43 h1:zuuope2k3Q8WkIKQTxz2PfwNnbbuTX73e27GoVtKxvo=
 github.com/olegnalivajev/learning_go_microservices/bookstore_items-api v0.1.1 h1:aoFFVgq+xfwmb1zr3YER0mAoeXVsjFFKK5/eUJH3yMQ=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
