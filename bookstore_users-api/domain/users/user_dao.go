@@ -1,37 +1,69 @@
 package users
 
 import (
-	"fmt"
+	"github.com/olegnalivajev/learning_go_microservices/bookstore_users-api/datasources/mysql/users_db"
+	"github.com/olegnalivajev/learning_go_microservices/bookstore_utils-go/date_utils"
 	"github.com/olegnalivajev/learning_go_microservices/bookstore_utils-go/errors"
+	"github.com/olegnalivajev/learning_go_microservices/bookstore_utils-go/mysql_utils"
 )
 
-var (
-	usersDb = make(map[int64]*User)
+const (
+	queryInsertUser = "INSERT INTO users(first_name, last_name, email, date_created) VALUES (?, ?, ?, ?)"
+	queryGetUser    = "SELECT id, first_name, last_name, email, date_created FROM users WHERE id=?"
+	queryUpdateUser = "UPDATE users SET first_name=?, last_name=?, email=? WHERE id=?"
 )
 
 func (user *User) Get() *errors.RestErr  {
-	result := usersDb[user.Id]
-	if result == nil {
-		return errors.NewNotFoundErr(fmt.Sprintf("User %d not found.", user.Id))
+	stmt, err := users_db.Client.Prepare(queryGetUser)
+	if err != nil {
+		return errors.NewInternalServerError(err.Error())
 	}
+	defer stmt.Close()
 
-	user.Id = result.Id
-	user.Email = result.Email
-	user.FirstName = result.FirstName
-	user.LastName = result.LastName
-	user.DateCreated = result.DateCreated
-
+	result := stmt.QueryRow(user.Id)
+	if getErr := result.Scan(&user.Id, &user.FirstName, &user.LastName, &user.Email, &user.DateCreated); getErr != nil {
+		return mysql_utils.ParseError(getErr)
+	}
 	return nil
 }
 
 func (user *User) Save() *errors.RestErr {
-	current := usersDb[user.Id]
-	if current != nil {
-		if current.Email == user.Email {
-			return errors.NewBadRequestErr("User with this email address already exists.")
-		}
-		return errors.NewBadRequestErr(fmt.Sprintf("User %d already exists.", user.Id))
+	// prepare the statement
+	stmt, err := users_db.Client.Prepare(queryInsertUser)
+	if err != nil {
+		return errors.NewInternalServerError(err.Error())
 	}
-	usersDb[user.Id] = user
+	defer stmt.Close()
+
+	// populated auto fields
+	user.DateCreated = date_utils.GetNowString()
+
+	// perform the database query
+	result, saveErr := stmt.Exec(user.FirstName, user.LastName, user.Email, user.DateCreated)
+	if saveErr != nil {
+		// attempt to convert error into SQL error
+		return mysql_utils.ParseError(saveErr)
+	}
+
+	// get result
+	userId, err := result.LastInsertId()
+	if err != nil {
+		return mysql_utils.ParseError(err)
+	}
+	user.Id = userId
+	return nil
+}
+
+func (user *User) Update() *errors.RestErr {
+	stmt, err := users_db.Client.Prepare(queryUpdateUser)
+	if err != nil {
+		return errors.NewInternalServerError(err.Error())
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(user.FirstName, user.LastName, user.Email, user.Id)
+	if err != nil {
+		return mysql_utils.ParseError(err)
+	}
 	return nil
 }
