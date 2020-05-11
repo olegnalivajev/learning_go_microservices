@@ -4,6 +4,7 @@ import "time"
 
 const (
 	apiDateLayout = "2006-01-02T15:04:05Z"
+	apiDbLayout = "2006-01-02 15:04:05"
 )
 
 func GetNowString() string {
@@ -13,4 +14,9 @@ func GetNowString() string {
 
 func GetString(time time.Time) string {
 	return time.Format(apiDateLayout)
+}
+
+func GetNowDbFormat() string {
+	now := time.Now().UTC()
+	return now.Format(apiDbLayout)
 }

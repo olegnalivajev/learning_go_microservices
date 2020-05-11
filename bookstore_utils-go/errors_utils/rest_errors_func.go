@@ -1,6 +1,8 @@
-package errors
+package errors_utils
 
-import "net/http"
+import (
+	"net/http"
+)
 
 func NewBadRequestErr(message string) *RestErr {
 	return &RestErr{

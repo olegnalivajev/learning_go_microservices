@@ -1,4 +1,4 @@
-package errors
+package errors_utils
 
 type RestErr struct {
 	Message string `json:"message"`

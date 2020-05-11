@@ -2,7 +2,7 @@ package mysql_utils
 
 import (
 	"github.com/go-sql-driver/mysql"
-	"github.com/olegnalivajev/learning_go_microservices/bookstore_utils-go/errors"
+	"github.com/olegnalivajev/learning_go_microservices/bookstore_utils-go/errors_utils"
 	"strings"
 )
 
@@ -10,17 +10,17 @@ const (
 	errorNoRows = "no rows in result set"
 )
 
-func ParseError(err error) *errors.RestErr  {
+func ParseError(err error) *errors_utils.RestErr  {
 	sqlErr, ok := err.(*mysql.MySQLError)
 	if !ok {
 		if strings.Contains(err.Error(), errorNoRows) {
-			return errors.NewNotFoundErr("no record found with given id")
+			return errors_utils.NewNotFoundErr("no record found with given id")
 		}
-		return errors.NewInternalServerError("error parsing database response")
+		return errors_utils.NewInternalServerError("error parsing database response")
 	}
 	switch sqlErr.Number {
 	case 1062:
-		return errors.NewBadRequestErr("duplicate etnry")
+		return errors_utils.NewBadRequestErr("duplicate etnry")
 	}
-	return errors.NewBadRequestErr("error processing request")
+	return errors_utils.NewBadRequestErr("error processing request")
 }
