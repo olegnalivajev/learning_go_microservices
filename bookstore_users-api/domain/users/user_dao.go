@@ -26,7 +26,7 @@ func (user *User) Get() *errors_utils.RestErr  {
 	result := stmt.QueryRow(user.Id)
 	if getErr := result.Scan(&user.Id, &user.FirstName, &user.LastName, &user.Email, &user.Status, &user.DateCreated); getErr != nil {
 		logger.Error("error when trying to get user by id", getErr)
-		return errors_utils.NewInternalServerError("database error")
+		return errors_utils.NewNotFoundErr("could not find user with given id")
 	}
 	return nil
 }
@@ -36,23 +36,22 @@ func (user *User) Save() *errors_utils.RestErr {
 	stmt, err := users_db.Client.Prepare(queryInsertUser)
 	if err != nil {
 		logger.Error("error when trying to prepare save user statement", err)
-		return errors_utils.NewInternalServerError("database error")
+		return errors_utils.NewInternalServerError("database error. couldn't save the user")
 	}
 	defer stmt.Close()
 
 	// perform the database query
 	result, saveErr := stmt.Exec(user.FirstName, user.LastName, user.Email, user.Status, user.Password, user.DateCreated)
 	if saveErr != nil {
-		// attempt to convert error into SQL error
 		logger.Error("error when trying to save user" , err)
-		return errors_utils.NewInternalServerError("database error")
+		return errors_utils.NewInternalServerError("database error. couldn't save the user")
 	}
 
 	// get result
 	userId, err := result.LastInsertId()
 	if err != nil {
 		logger.Error("error when trying to get last user insert id after creating a new user" , err)
-		return errors_utils.NewInternalServerError("database error")
+		return errors_utils.NewInternalServerError("database error. couldn't save the user")
 	}
 	user.Id = userId
 	return nil
@@ -62,14 +61,14 @@ func (user *User) Update() *errors_utils.RestErr {
 	stmt, err := users_db.Client.Prepare(queryUpdateUser)
 	if err != nil {
 		logger.Error("error when trying to prepare update statement" , err)
-		return errors_utils.NewInternalServerError("database error")
+		return errors_utils.NewInternalServerError("database error. couldn't update the user")
 	}
 	defer stmt.Close()
 
 	_, err = stmt.Exec(user.FirstName, user.LastName, user.Email, user.Id)
 	if err != nil {
 		logger.Error(fmt.Sprintf("error trying to update user with id %d", user.Id) , err)
-		return errors_utils.NewInternalServerError("database error")
+		return errors_utils.NewInternalServerError("database error. couldn't update the user")
 	}
 	return nil
 }
@@ -78,12 +77,12 @@ func (user *User) Delete() *errors_utils.RestErr {
 	stmt, err := users_db.Client.Prepare(queryDeleteUser)
 	if err != nil {
 		logger.Error("error when trying to prepare delete user statement" , err)
-		return errors_utils.NewInternalServerError("database error")
+		return errors_utils.NewInternalServerError("database error. couldn't delete the user")
 	}
 	defer stmt.Close()
 	if _, err := stmt.Exec(user.Id); err != nil {
 		logger.Error("error when trying to delete user" , err)
-		return errors_utils.NewInternalServerError("database error")
+		return errors_utils.NewInternalServerError("database error. couldn't delete the user")
 	}
 	return nil
 }
