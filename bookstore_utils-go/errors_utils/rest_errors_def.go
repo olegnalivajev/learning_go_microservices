@@ -1,7 +1,8 @@
 package errors_utils
 
 type RestErr struct {
-	Message string `json:"message"`
-	Status 	int	   `json:"status"`
-	Error	string `json:"error"`
+	Message string        `json:"message"`
+	Status  int           `json:"status"`
+	Error   string        `json:"error"`
+	Causes  []interface{} `json:"causes"`
 }

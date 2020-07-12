@@ -16,7 +16,7 @@ const (
 )
 
 var (
-	Client *sql.DB
+	Client   *sql.DB
 	username = os.Getenv(mysql_users_username)
 	password = os.Getenv(mysql_users_password)
 	host     = os.Getenv(mysql_users_host)
@@ -28,7 +28,7 @@ func init() {
 		username, password, host, schema)
 
 	var err error
-	Client, err = sql.Open("mysql",dataSource)
+	Client, err = sql.Open("mysql", dataSource)
 	if err != nil {
 		panic(err)
 	}

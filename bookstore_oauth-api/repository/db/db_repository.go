@@ -3,7 +3,7 @@ package db
 import (
 	"github.com/gocql/gocql"
 	"github.com/olegnalivajev/learning_go_microservices/bookstore_oauth-api/clients/cassandra"
-	"github.com/olegnalivajev/learning_go_microservices/bookstore_oauth-api/domain/model"
+	"github.com/olegnalivajev/learning_go_microservices/bookstore_oauth-api/domain/access_token"
 	"github.com/olegnalivajev/learning_go_microservices/bookstore_utils-go/errors_utils"
 )
 
@@ -14,9 +14,9 @@ const (
 )
 
 type DbRepository interface {
-	GetById(string) (*model.AccessToken, *errors_utils.RestErr)
-	Create(model.AccessToken) *errors_utils.RestErr
-	UpdateExpires(model.AccessToken) *errors_utils.RestErr
+	GetById(string) (*access_token.AccessToken, *errors_utils.RestErr)
+	Create(access_token.AccessToken) *errors_utils.RestErr
+	UpdateExpires(access_token.AccessToken) *errors_utils.RestErr
 }
 
 type repository struct {
@@ -26,8 +26,8 @@ func NewRepo() DbRepository {
 	return &repository{}
 }
 
-func (rep *repository) GetById(id string) (*model.AccessToken, *errors_utils.RestErr) {
-	var result model.AccessToken
+func (rep *repository) GetById(id string) (*access_token.AccessToken, *errors_utils.RestErr) {
+	var result access_token.AccessToken
 	if err := cassandra.GetSession().Query(queryGetAccessToken, id).Scan(
 		&result.AccessToken,
 		&result.UserId,
@@ -37,21 +37,21 @@ func (rep *repository) GetById(id string) (*model.AccessToken, *errors_utils.Res
 		if err == gocql.ErrNotFound {
 			return nil, errors_utils.NewNotFoundErr("no access token found")
 		}
-		return nil, errors_utils.NewInternalServerError(err.Error())
+		return nil, errors_utils.NewInternalServerError("could not get access token", err)
 	}
 	return &result, nil
 }
 
-func (rep *repository) Create(at model.AccessToken) *errors_utils.RestErr  {
+func (rep *repository) Create(at access_token.AccessToken) *errors_utils.RestErr  {
 	if err := cassandra.GetSession().Query(queryCreateAccessToken, at.AccessToken, at.UserId, at.ClientId, at.Expires).Exec(); err != nil {
-		return errors_utils.NewInternalServerError(err.Error())
+		return errors_utils.NewInternalServerError("could not create access token", err)
 	}
 	return nil
 }
 
-func (rep *repository) UpdateExpires(at model.AccessToken) *errors_utils.RestErr {
+func (rep *repository) UpdateExpires(at access_token.AccessToken) *errors_utils.RestErr {
 	if err := cassandra.GetSession().Query(queryUpdateExpires, at.Expires, at.AccessToken).Exec(); err != nil {
-		return errors_utils.NewInternalServerError(err.Error())
+		return errors_utils.NewInternalServerError("could not update expiration date time", err)
 	}
 	return nil
 }

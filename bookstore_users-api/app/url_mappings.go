@@ -14,6 +14,9 @@ func mapUrls()  {
 	router.PATCH("/users/:id", users.Update)
 	router.DELETE("/users/:id", users.Delete)
 
+	// gotta be secure - HTTPS
+	router.POST("/users/login", users.Login)
+
 	// internal
 	router.GET("/internal/users/search", users.Search)
 }

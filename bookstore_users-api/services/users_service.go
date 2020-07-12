@@ -9,19 +9,20 @@ import (
 )
 
 var (
-	UserService userServiceInterface= &userService{}
+	UserService userServiceInterface = &userService{}
 )
 
-type userService struct {}
+type userService struct{}
 type userServiceInterface interface {
 	CreateUser(users.User) (*users.User, *errors_utils.RestErr)
 	GetUser(int64) (*users.User, *errors_utils.RestErr)
 	UpdateUser(bool, users.User) (*users.User, *errors_utils.RestErr)
 	DeleteUser(int64) *errors_utils.RestErr
 	SearchUser(string) (users.Users, *errors_utils.RestErr)
+	LoginUser(users.LoginRequest) (*users.User, *errors_utils.RestErr)
 }
 
-func (s *userService) CreateUser(user users.User) (*users.User, *errors_utils.RestErr)  {
+func (s *userService) CreateUser(user users.User) (*users.User, *errors_utils.RestErr) {
 	if err := user.Validate(); err != nil {
 		return nil, err
 	}
@@ -59,7 +60,7 @@ func (s *userService) UpdateUser(isPartial bool, user users.User) (*users.User, 
 		if user.Email != "" {
 			curr.Email = user.Email
 		}
-	} else{
+	} else {
 		curr.FirstName = user.FirstName
 		curr.LastName = user.LastName
 		curr.Email = user.Email
@@ -81,4 +82,16 @@ func (s *userService) DeleteUser(id int64) *errors_utils.RestErr {
 func (s *userService) SearchUser(status string) (users.Users, *errors_utils.RestErr) {
 	dao := &users.User{Status: status}
 	return dao.FindByStatus()
+}
+
+func (s *userService) LoginUser(request users.LoginRequest) (*users.User, *errors_utils.RestErr) {
+	dao := &users.User{
+		Email:    request.Email,
+		Password: crypro_utils.GetMD5(request.Password),
+		Status: users.Active.String(),
+	}
+	if err := dao.FindByEmailAndPass(); err != nil {
+		return nil, err
+	}
+	return dao, nil
 }
